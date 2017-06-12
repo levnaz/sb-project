@@ -1,5 +1,5 @@
 # This script reads an 11-day wifi trace file, replicates it and
-# passes to kafka line by line.
+# streams to kafka line by line.
 
 import os
 import sys
@@ -7,10 +7,23 @@ import datetime
 import csv
 import time
 
-#from kafka import SimpleProducer, KafkaClient
+from kafka import SimpleProducer, KafkaClient
 
-#datacsv = '../data/output_sorted_association_time2.csv.txt'
-datacsv = '../output_sorted_association_time.csv'
+# take the kafka topic as an input argument
+if len(sys.argv) > 1:
+    topic = sys.argv[1]
+else:
+    print('Please run again and provide a kafka topic as an argument.')
+    exit()
+
+print('The kafka topic is: {}').format(topic)
+
+# the data file's full path
+datacsv = '/home/ubuntu/git/sb-project/data/data.csv'
+
+# kafka hostname and port number
+kafka = KafkaClient('localhost:9092')
+producer = SimpleProducer(kafka)
 
 def get_datetime(line, DATETIMEFORMAT='%a %b %d %H:%M:%S UTC %Y'):
     # returns date + time + time-zone of a line in the trace
@@ -36,7 +49,7 @@ def datetime_to_string(dt, TIMEFORMAT='%Y-%m-%d %H:%M:%S'):
     return datetime.datetime.strftime(dt, TIMEFORMAT)
 
 def add_days(date, day=1):
-    # Adds day(s) to the given date
+    # Adds day(s) to the given date. By default adds 1 day
     # Returns datetime.
     return date + datetime.timedelta(days = day)
 
@@ -104,10 +117,7 @@ def data_to_stream(line, days):
     try:
         output += ip_address(line)
         output += '\t' + mac_address(line)
-        #output += '\t' + assocation_time(line)
         association_datetime = assocation_time(line)
-        #print association_datetime
-        #print datetime_to_string(add_days(association_datetime, days))
         output += '\t' + datetime_to_string(add_days(association_datetime, days))
         output += '\t' + vendor(line)
         output += '\t' + access_point(line)
@@ -132,12 +142,9 @@ def data_to_stream(line, days):
 # 'Client IP Address', 'Client MAC Address', 'Association Time', 'Vendor',
 # 'AP Name', 'Device Name', 'Map Location', 'SSID', 'Profile', 'VLAN ID',
 # 'Protocol', 'Session Duration', 'Policy Type', 'Avg. Session Throughput (Kbps)'
-
 days = 0 # required to replicate the 11 day data
 
 while True:
-    #print days
-
     with open(datacsv, 'r') as csvFile:
         lines = csv.reader(csvFile)
         row = 0
@@ -145,11 +152,16 @@ while True:
         for line in lines:
             if row == 0:
                 row += 1
-                continue
+                continue # skip the csv header
 
             new_date = add_days(assocation_time(line), days)
             stream_to_kafka = data_to_stream(line, days)
-            print stream_to_kafka
-
+            try: # try to encode the kafka message
+                encoded_message = stream_to_kafka.encode('UTF-8')
+                #print encoded_message
+            except: # in case encoding is not successful
+                print('Oops, cannot encode the message. Skipping the following message:\n{}\n').format(stream_to_kafka)
+                continue # skip the message
+            producer.send_messages(topic, encoded_message) # send the message with the provided topic
             time.sleep(0.0001)
     days += 11 # Once the csv file is processed, start over and add 11, 22, 33, ... days to the association date
