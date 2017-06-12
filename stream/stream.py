@@ -21,8 +21,12 @@ print('The kafka topic is: {}').format(topic)
 # the data file's full path
 datacsv = '/home/ubuntu/git/sb-project/data/data.csv'
 
+# hostname and port details
+hostname = '10.0.0.14'
+port = '9092'
+
 # kafka hostname and port number
-kafka = KafkaClient('localhost:9092')
+kafka = KafkaClient(hostname + ':' + port)
 producer = SimpleProducer(kafka)
 
 def get_datetime(line, DATETIMEFORMAT='%a %b %d %H:%M:%S UTC %Y'):
