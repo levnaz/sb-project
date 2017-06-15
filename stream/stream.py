@@ -19,7 +19,7 @@ else:
 print('The kafka topic is: {}').format(topic)
 
 # the data file's full path
-datacsv = '/home/ubuntu/git/sb-project/data/data.csv'
+datacsv = '/home/ubuntu/git/sb-project/data/data-noUC.csv'
 
 # hostname and port details
 hostname = '10.0.0.14'
@@ -167,5 +167,6 @@ while True:
                 print('Oops, cannot encode the message. Skipping the following message:\n{}\n').format(stream_to_kafka)
                 continue # skip the message
             producer.send_messages(topic, encoded_message) # send the message with the provided topic
-            time.sleep(0.0001)
+            #time.sleep(0.0001)
+            time.sleep(2)
     days += 11 # Once the csv file is processed, start over and add 11, 22, 33, ... days to the association date
