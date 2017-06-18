@@ -6,28 +6,35 @@ import sys
 import datetime
 import csv
 import time
+import numpy as np
 
-from kafka import SimpleProducer, KafkaClient
+from pykafka import KafkaClient
+from pykafka.partitioners import HashingPartitioner
+from pykafka.partitioners import BasePartitioner
+
 
 # take the kafka topic as an input argument
 if len(sys.argv) > 1:
-    topic = sys.argv[1]
+    myTopic = sys.argv[1]
 else:
     print('Please run again and provide a kafka topic as an argument.')
     exit()
 
-print('The kafka topic is: {}').format(topic)
+print('The kafka topic is: {}').format(myTopic)
 
 # the data file's full path
 datacsv = '/home/ubuntu/git/sb-project/data/data-noUC.csv'
 
 # hostname and port details
-hostname = '10.0.0.14'
-port = '9092'
+kafka_hostnames = '10.0.0.13:9092,10.0.0.8:9092,10.0.0.14:9092'
+zookeeper_host = '10.0.0.6:2181'
 
-# kafka hostname and port number
-kafka = KafkaClient(hostname + ':' + port)
-producer = SimpleProducer(kafka)
+client = KafkaClient(hosts=kafka_hostnames, zookeeper_hosts=zookeeper_host)
+#client = KafkaClient('localhost:9092')
+topic = client.topics[myTopic]
+
+hash_partitioner = HashingPartitioner()
+producer = topic.get_producer(partitioner=hash_partitioner, linger_ms=200)
 
 def get_datetime(line, DATETIMEFORMAT='%a %b %d %H:%M:%S UTC %Y'):
     # returns date + time + time-zone of a line in the trace
@@ -114,7 +121,7 @@ def throughput(line):
     # returns the Avg. Session Throughput (Kbps) from a row in csv file
     return line[13]
 
-def data_to_stream(line, days):
+def data_to_stream(line, days, recordID):
     # creates messages for kafka
     output = str()
 
@@ -134,6 +141,7 @@ def data_to_stream(line, days):
         output += '\t' + str(session_suration(line))
         output += '\t' + policy_type(line)
         output += '\t' + throughput(line)
+        output += '\t' + str(recordID)
     except: # in case of exception return an empty string
         print('Oops, something went wrong. Check the following line:\n{}\n').format(line)
         return str() # return an empty string if something is wrong with the line
@@ -147,6 +155,7 @@ def data_to_stream(line, days):
 # 'AP Name', 'Device Name', 'Map Location', 'SSID', 'Profile', 'VLAN ID',
 # 'Protocol', 'Session Duration', 'Policy Type', 'Avg. Session Throughput (Kbps)'
 days = 0 # required to replicate the 11 day data
+recordID = 1 # required for enc/dec operations
 
 while True:
     with open(datacsv, 'r') as csvFile:
@@ -159,14 +168,19 @@ while True:
                 continue # skip the csv header
 
             new_date = add_days(assocation_time(line), days)
-            stream_to_kafka = data_to_stream(line, days)
+            stream_to_kafka = data_to_stream(line, days, recordID)
             try: # try to encode the kafka message
                 encoded_message = stream_to_kafka.encode('UTF-8')
                 #print encoded_message
             except: # in case encoding is not successful
                 print('Oops, cannot encode the message. Skipping the following message:\n{}\n').format(stream_to_kafka)
                 continue # skip the message
-            producer.send_messages(topic, encoded_message) # send the message with the provided topic
+            
+            # send (produce) messages
+            producer.produce(encoded_message, partition_key=mac_address(line))
+            
+            recordID += 1
             #time.sleep(0.0001)
-            time.sleep(2)
+            time.sleep(5)
     days += 11 # Once the csv file is processed, start over and add 11, 22, 33, ... days to the association date
+
