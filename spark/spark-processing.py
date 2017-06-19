@@ -348,19 +348,24 @@ def save_to_db(data, insertSQL, emptyTable='No'):
     # To empty the table if asked
     if emptyTable == 'Yes':
         c.execute('TRUNCATE TABLE t_range_m')
+        
+        # Make sure data is committed to the database
+        conn.commit()
 
     try:
         c.execute(insertSQL, data)
         conn.commit()
-    except mysql.connector.Error as err:
-        print(err)
-        print('rollback')
-        conn.rollback()
 
-    # Make sure data is committed to the database
-    conn.commit()
-    c.close()
-    conn.close()
+    except MySQLdb.Error as err:
+        conn.rollback() # rollback transaction here 
+        print(err[1])
+        print('rollback')
+
+    finally:
+        # Make sure data is committed to the database
+        conn.commit()
+        c.close()
+        conn.close()
 
 
 def encrypt_record(record):

@@ -26,8 +26,8 @@ print('The kafka topic is: {}').format(myTopic)
 datacsv = '/home/ubuntu/git/sb-project/data/data-noUC.csv'
 
 # hostname and port details
-kafka_hostnames = '10.0.0.13:9092,10.0.0.8:9092,10.0.0.14:9092'
-zookeeper_host = '10.0.0.6:2181'
+kafka_hostnames = '10.0.0.7:9092,10.0.0.4:9092,10.0.0.13:9092'
+zookeeper_host = '10.0.0.10:2181'
 
 client = KafkaClient(hosts=kafka_hostnames, zookeeper_hosts=zookeeper_host)
 #client = KafkaClient('localhost:9092')
@@ -180,7 +180,6 @@ while True:
             producer.produce(encoded_message, partition_key=mac_address(line))
             
             recordID += 1
-            time.sleep(0.2)
-            #time.sleep(5)
+            time.sleep(0.1)
     days += 11 # Once the csv file is processed, start over and add 11, 22, 33, ... days to the association date
 
