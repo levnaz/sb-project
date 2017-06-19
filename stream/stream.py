@@ -180,7 +180,7 @@ while True:
             producer.produce(encoded_message, partition_key=mac_address(line))
             
             recordID += 1
-            #time.sleep(0.0001)
-            time.sleep(5)
+            time.sleep(0.2)
+            #time.sleep(5)
     days += 11 # Once the csv file is processed, start over and add 11, 22, 33, ... days to the association date
 
