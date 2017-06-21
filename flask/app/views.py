@@ -124,9 +124,3 @@ def db_plain():
         if recordID not in db_item:
             db_item[recordID] = [mac_address, access_point, internalNodesStr, stay]
     return render_template('db_plain.html', db_item = db_item)
-
-@app.route('/getFruits')
-def my_view():
-    data = ['Banana', 'Apple', 'Orange', 'Pear', 'Watermalon'] # you can get list from your DB instead
-    return render_template('fruits.html', data=json.dumps(data))
-
