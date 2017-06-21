@@ -5,6 +5,7 @@
 2. [Details of Implementation](README.md#details-of-implementation)
 3. [Repo directory structure](README.md#repo-directory-structure)
 
+
 # Introduction
 This application is designed to preserve user privacy by encrypting streaming WiFi logs. The challenge is to encrypt time ranges in the logs and then to make queries over the encrypted data. The application supports the following features:
 
@@ -39,12 +40,43 @@ A producer (written in Python) reads WiFi logs from a csv file and streams to Ka
  - Avg. Session Throughput (Kbps)
 ![](images/pipeline.png)
 
-The consumer (Spark Streaming) receives the data stream, encrypts the stream and inserts the data into MySQL:
+The consumer (Spark Streaming) receives the data stream, encrypts the stream and inserts the data into a MySQL database:
 
  - Client MAC Address
  - Access Point Name
  - Time Ranges
  - Session Duration
 
-Data processing is performed in a privacy-preserving fashion without them being ever revealed in plaintext to the data processing server.
+Data processing is performed in a privacy-preserving fashion without them being ever revealed in plaintext to the data processing server. A proxy server retrieves the encrypted data from database, decrypts the data and returns the plaintext results to Flask. Finally, Flask is used to display the data.
+
+
+## Repo Directory Structure
+
+The directory structure for my repo looks like this:
+
+    |____.gitignore
+    |____flask
+    | |____app
+    | | |______init__.py
+    | | |____authdata.py
+    | | |____static
+    | | | |____styles
+    | | | | |____bootstrap.min.css
+    | | | | |____jumbotron-narrow.css
+    | | |____templates
+    | | | |____db_enc.html
+    | | | |____db_plain.html
+    | | | |____index.html
+    | | |____views.py
+    | |____run.py
+    | |____tmp
+    | |____tornadoapp.py
+    |____images
+    | |____pipeline.png
+    |____README.md
+    |____spark
+    | |____authdata.py
+    | |____spark-processing.py
+    |____stream
+    | |____stream.py
 
