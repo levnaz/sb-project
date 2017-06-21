@@ -14,7 +14,7 @@ This application is designed to preserve user privacy by encrypting streaming Wi
 
 **Feature 3:** Support 2 Smart building applications: "User presence check" and "People counting".
 
-The project's URL is available at [http://privacyplease.website](privacyplease.website).
+The project's URL is available at [http://privacyplease.website](http://privacyplease.website).
 
 
 # Details of Implementation
