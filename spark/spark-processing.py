@@ -6,6 +6,7 @@ import MySQLdb
 import math
 import base64
 import linecache
+import authdata # imports my credentials
 
 from Crypto.Cipher import AES
 from pyspark import SparkContext, SparkConf
@@ -13,7 +14,6 @@ from pyspark.sql import SQLContext
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
 from uuid import uuid1
-
 from operator import add
 
 def streamrdd_to_df(srdd):
@@ -46,9 +46,9 @@ def make_item(strItem):
     return networkItem
 
 
-#########################################
-## Encryption related helper functions ##
-#########################################
+################################################
+## Start: Encryption related helper functions ##
+################################################
 
 def get_datetime(line, DATETIMEFORMAT='%a %b %d %H:%M:%S UTC %Y'):
     # Returns date + time + time-zone (by default) of a line
@@ -341,14 +341,22 @@ def divide_into_subintervals(start, end, interval_len, maxLen, minutesInAllDays)
             result.extend(urc(end_interval_index * interval_len, end, maxLen))
     return result
 
+##############################################
+## End: Encryption related helper functions ##
+##############################################
+
 def save_to_db(data, insertSQL, emptyTable='No'):
-    conn = MySQLdb.connect(host='10.0.0.11', user='root', passwd='Ankapkod22', db='privacy')
+    # Connects to DB and inserts the data
+    conn = MySQLdb.connect(host=authdata.MYSQL_DATABASE_HOST,
+                           user=authdata.MYSQL_DATABASE_USER,
+                           passwd=authdata.MYSQL_DATABASE_PASSWORD,
+                           db=authdata.MYSQL_DATABASE_DB)
     c = conn.cursor() # creating a Cursor object to execute queries
 
     # To empty the table if asked
     if emptyTable == 'Yes':
         c.execute('TRUNCATE TABLE t_range_m')
-        
+
         # Make sure data is committed to the database
         conn.commit()
 
@@ -367,13 +375,11 @@ def save_to_db(data, insertSQL, emptyTable='No'):
         c.close()
         conn.close()
 
-
 def encrypt_record(record):
     # Takes a record in and returns an encrypted message
    
-    # Encryption keys 
-    aesKeyStr = 'MonToQaByj+XqCLU5pi9TA=='
-    timeKey = 'YUF6ZFlDbTlHQk1DZWt4aklYaWg2NHI0WThmaWpibUE='
+    # Encryption key
+    aesKeyStr = authdata.AESKEY
     
     # The closest power of 2 that is larger than 60 (minutes) is 2^6 = 64
     interval_len = 64
@@ -390,9 +396,6 @@ def encrypt_record(record):
     # Tree related parameters
     maxLen = maxLength(maxNum)
     maxDep = maxDepth(maxNum)
-
-    # To empty the table use
-    # c.execute('TRUNCATE TABLE t_range_m')
 
     recordID = record['recordID']
     mac_address = record['mac_address']
@@ -432,9 +435,9 @@ def encrypt_record(record):
             'c4': stay_enc}
     insertSQL = "insert into t_range_m (recordID, c1, c2, c3, c4) values (%(recordID)s, %(c1)s, %(c2)s, %(c3)s, %(c4)s)"
     save_to_db(data, insertSQL)
-    
 
-# set up the contexts
+
+# Set up the contexts
 conf = SparkConf().setAppName("Smart Buildings")
 sc = SparkContext(conf=conf)
 stream = StreamingContext(sc, 1) # 1 second window
@@ -443,7 +446,7 @@ stream = StreamingContext(sc, 1) # 1 second window
 kafka_stream = KafkaUtils.createStream(stream,  # StreamingContext object
                'localhost:2181',                # Zookeeper quorum
                'my-test-group',                 # The group id for this consumer
-               {'smartBuildings':1})               # Dict of (topic_name -> numPartitions) to consume
+               {'smartBuildings':1})            # Dict of (topic_name -> numPartitions) to consume
                                                 # Each partition is consumed in its own thread
 val_tup = kafka_stream.map(lambda x: x[1])
 itemsStream = val_tup.map(lambda s: make_item(s))
@@ -453,4 +456,3 @@ encStream.pprint()
 
 stream.start() # start the streaming application
 stream.awaitTermination()
-

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+    <title>Preserving User Privacy in a Smart Building Era</title>
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/jumbotron-narrow.css') }}">
+</head>
+ 
+<body>
+    <div class="container">
+        <div class="header">
+            <nav>
+                <ul class="nav nav-pills pull-right">
+                    <li role="presentation" class="active"><a href="#">Home</a>
+                    </li>
+                    <li role="presentation"><a href="https://goo.gl/yExMde" target="_blank">Slides</a>
+                    </li>
+                    <li role="presentation"><a href="https://github.com/levnaz/sb-project" target="_blank">Github</a>
+                    </li>
+                </ul>
+            </nav>
+            <h3 class="text-muted">Privacy Please App</h3>
+        </div>
+ 
+        <div class="jumbotron">
+            <h1>Preserving User Privacy in a Smart Building Era</h1>
+            <p class="lead"></p>
+            <!-- <p><a class="btn btn-lg btn-success" href="showSignUp" role="button">Sign up today</a> -->
+            </p>
+        </div>
+ 
+        <div class="row marketing">
+            <div class="col-lg-6">
+                <!-- <h4>Encrypted Data</h4> -->
+                <p><a class="btn btn-lg btn-success" href="db_enc" role="button">Encrypted Data</a><br>
+                    This page queries and displays the data stored in a DB. The purpose of this page is to give an idea how the data is stored in the DB.
+                    <br><br><br> <!-- to look nice on web browser -->
+                    </p>
+ 
+                <!-- <h4>User Presense Check</h4> -->
+                <p><a class="btn btn-lg btn-success" href="#" role="button">User Presense Check</a><br>
+                    Coming soon. Stay tuned :)</p>
+            </div>
+ 
+            <div class="col-lg-6">
+                <!-- <h4>Plaintext Data</h4> -->
+                <p><a class="btn btn-lg btn-success" href="db_plain" role="button">Plaintext Data</a><br>
+                    This page queries, decrypts MAC addresses, access poin names, the connection times (start + end) and displays the data.
+                    The purpose of this page is to give an idea how the encrypted data is decrypted.
+                    Note that decrypted MAC addresses are still hashed.</p>
+ 
+                <!-- <h4>People Count</h4> -->
+                <p><a class="btn btn-lg btn-success" href="#" role="button">People Count</a><br>
+                    Coming soon. Stay tuned :)</p>
+            </div>
+        </div>
+ 
+        <footer class="footer">
+            <p>&copy; LN 2017</p>
+        </footer>
+ 
+    </div>
+</body>
+</html>

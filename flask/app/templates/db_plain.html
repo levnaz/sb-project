@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Preserving User Privacy in a Smart Building Era</title>
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/jumbotron-narrow.css') }}">
+</head>
+
+<body>
+        <div class="header">
+            <nav>
+                <ul class="nav nav-pills pull-right">
+                    <li role="presentation" class="active"><a href="/">Home</a>
+                    </li>
+                    <li role="presentation"><a href="db_enc">Encrypted Data</a>
+                    </li>
+                    <li role="presentation"><a href="db_plain">Plaintext Data</a>
+                    </li>
+                </ul>
+            </nav>
+            <h3 class="text-muted">Privacy Please App</h3>
+        </div>
+
+<table border="1" cellpadding="5" cellspacing="5">
+<tr>
+    <th>RecordID</th>
+    <th>MAC_Address</th>
+    <th>AP</th>
+    <th>Internal_Nodes</th>
+    <th>Stay</th>
+  </tr>
+
+{% for key, value in db_item.iteritems() %}
+   <tr>
+        <th> {{ key }} </th>
+        <td> {{ value[0] }} </td>
+        <td> {{ value[1] }} </td>
+        <td> {{ value[2] }} </td>
+        <td> {{ value[3] }} </td>
+        <td> {{ value[4] }} </td>
+   </tr>
+{% endfor %}
+</table>

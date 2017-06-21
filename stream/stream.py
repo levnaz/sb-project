@@ -12,8 +12,7 @@ from pykafka import KafkaClient
 from pykafka.partitioners import HashingPartitioner
 from pykafka.partitioners import BasePartitioner
 
-
-# take the kafka topic as an input argument
+# Take the kafka topic as an input argument
 if len(sys.argv) > 1:
     myTopic = sys.argv[1]
 else:
@@ -22,10 +21,10 @@ else:
 
 print('The kafka topic is: {}').format(myTopic)
 
-# the data file's full path
+# The data file's full path
 datacsv = '/home/ubuntu/git/sb-project/data/data-noUC.csv'
 
-# hostname and port details
+# Hostname and port details
 kafka_hostnames = '10.0.0.7:9092,10.0.0.4:9092,10.0.0.13:9092'
 zookeeper_host = '10.0.0.10:2181'
 
@@ -36,13 +35,14 @@ topic = client.topics[myTopic]
 hash_partitioner = HashingPartitioner()
 producer = topic.get_producer(partitioner=hash_partitioner, linger_ms=200)
 
+
 def get_datetime(line, DATETIMEFORMAT='%a %b %d %H:%M:%S UTC %Y'):
-    # returns date + time + time-zone of a line in the trace
-    # returns datetime
+    # Returns date + time + time-zone of a line in the trace
+    # Returns datetime
     return datetime.datetime.strptime(line, DATETIMEFORMAT)
 
 def get_time(line, TIMEFORMAT='%d days %H hrs %M min %S sec'):
-    # returns time in datetime type
+    # Returns time in datetime type
     if 'days' not in line and 'hrs' in line and 'min' in line and 'sec' in line:
         TIMEFORMAT = '%H hrs %M min %S sec'
     if 'days' not in line and 'hrs' not in line and 'min' in line and 'sec' in line:
@@ -65,64 +65,64 @@ def add_days(date, day=1):
     return date + datetime.timedelta(days = day)
 
 def ip_address(line):
-    # returns the IP address from a row in csv file
+    # Returns the IP address from a row in csv file
     return line[0]
 
 def mac_address(line):
-    # returns the MAC address from a row in csv file
+    # Returns the MAC address from a row in csv file
     return line[1]
 
 def assocation_time(line):
-    # returns the Association Time in datetime type from a row in csv file
+    # Returns the Association Time in datetime type
     return get_datetime(line[2])
 
 def vendor(line):
-    # returns the Vendor from a row in csv file
+    # Returns the Vendor
     return line[3]
 
 def access_point(line):
-    # returns the Access Point name from a row in csv file
+    # Returns the Access Point name
     return line[4]
 
 def device_name(line):
-    # returns the Device name from a row in csv file
+    # Returns the Device name
     return line[5]
 
 def map_location(line):
-    # returns the Map Location from a row in csv file
+    # Returns the Map Location
     return line[6]
 
 def ssid(line):
-    # returns the SSID from a row in csv file
+    # Returns the SSID
     return line[7]
 
 def profile(line):
-    # returns the Profile from a row in csv file
+    # Returns the Profile
     return line[8]
 
 def vlan_id(line):
-    # returns the VLAN ID from a row in csv file
+    # Returns the VLAN ID
     return line[9]
 
 def protocol(line):
-    # returns the Protocol from a row in csv file
+    # Returns the Protocol
     return line[10]
 
 def session_suration(line):
-    # returns the Session Duration in seconds from a row in csv file
+    # Returns the Session Duration in seconds
     dt = get_time(line[11])
     return dt.day * 86400 + dt.hour * 3600 + dt.minute * 60 + dt.second
 
 def policy_type(line):
-    # returns the Policy Type from a row in csv file
+    # Returns the Policy Type
     return line[12]
 
 def throughput(line):
-    # returns the Avg. Session Throughput (Kbps) from a row in csv file
+    # Returns the Avg. Session Throughput (Kbps)
     return line[13]
 
 def data_to_stream(line, days, recordID):
-    # creates messages for kafka
+    # Creates messages for kafka
     output = str()
 
     try:
@@ -142,7 +142,7 @@ def data_to_stream(line, days, recordID):
         output += '\t' + policy_type(line)
         output += '\t' + throughput(line)
         output += '\t' + str(recordID)
-    except: # in case of exception return an empty string
+    except:
         print('Oops, something went wrong. Check the following line:\n{}\n').format(line)
         return str() # return an empty string if something is wrong with the line
 
@@ -154,6 +154,7 @@ def data_to_stream(line, days, recordID):
 # 'Client IP Address', 'Client MAC Address', 'Association Time', 'Vendor',
 # 'AP Name', 'Device Name', 'Map Location', 'SSID', 'Profile', 'VLAN ID',
 # 'Protocol', 'Session Duration', 'Policy Type', 'Avg. Session Throughput (Kbps)'
+
 days = 0 # required to replicate the 11 day data
 recordID = 1 # required for enc/dec operations
 
@@ -171,7 +172,6 @@ while True:
             stream_to_kafka = data_to_stream(line, days, recordID)
             try: # try to encode the kafka message
                 encoded_message = stream_to_kafka.encode('UTF-8')
-                #print encoded_message
             except: # in case encoding is not successful
                 print('Oops, cannot encode the message. Skipping the following message:\n{}\n').format(stream_to_kafka)
                 continue # skip the message
@@ -182,4 +182,3 @@ while True:
             recordID += 1
             time.sleep(0.1)
     days += 11 # Once the csv file is processed, start over and add 11, 22, 33, ... days to the association date
-

@@ -1,4 +1,4 @@
 config
-server-info.txt
-*.swp
 data
+*.swp
+*.pyc
