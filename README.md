@@ -19,7 +19,7 @@ The project's URL is available at [http://privacyplease.website](http://privacyp
 
 
 # Details of Implementation
-The project used Kafka, Spark Streaming, MySQL and Flask to implement an end-to-end data pipeline on Amazon Web Services (AWS).
+The project used Kafka, Spark Streaming, MySQL, Flask and a Proxy server to implement an end-to-end data pipeline on Amazon Web Services (AWS).
 
 ## Pipeline
 A producer (written in Python) reads WiFi logs from a csv file and streams to Kafka. Each line in the stream has the following tab-separated fields:
@@ -40,43 +40,33 @@ A producer (written in Python) reads WiFi logs from a csv file and streams to Ka
  - Avg. Session Throughput (Kbps)
 ![](images/pipeline.png)
 
-The consumer (Spark Streaming) receives the data stream, encrypts the stream and inserts the data into a MySQL database:
+The consumer (Spark Streaming) receives the data stream, encrypts the stream and inserts the encrypted data into a MySQL database. Only the following fields are considered in this project:
 
  - Client MAC Address
  - Access Point Name
  - Time Ranges
  - Session Duration
 
-Data processing is performed in a privacy-preserving fashion without them being ever revealed in plaintext to the data processing server. A proxy server retrieves the encrypted data from database, decrypts the data and returns the plaintext results to Flask. Finally, Flask is used to display the data.
+When the user runs either "User presence check" or "People counting" application, Flask generates plaintext queries and send them to the Proxy server. The Proxy server converts the plaintext queries into ciphertext queries, send them to MySQL database and retrieves encrypted data. The Proxy server decrypts the data and returns the plaintext results to Flask. Data processing is performed in a privacy-preserving fashion without them being ever revealed in plaintext to the data database server. Finally, Flask displays the plaintext data to the user.
 
 
 ## Repo Directory Structure
 
 The directory structure for my repo looks like this:
 
-    |____.gitignore
     |____flask
     | |____app
-    | | |______init__.py
-    | | |____authdata.py
     | | |____static
     | | | |____styles
-    | | | | |____bootstrap.min.css
-    | | | | |____jumbotron-narrow.css
     | | |____templates
-    | | | |____db_enc.html
-    | | | |____db_plain.html
-    | | | |____index.html
     | | |____views.py
     | |____run.py
-    | |____tmp
     | |____tornadoapp.py
-    |____images
-    | |____pipeline.png
-    |____README.md
     |____spark
-    | |____authdata.py
     | |____spark-processing.py
     |____stream
     | |____stream.py
 
+ - `flask`: Contains all necessary files (including style and HTML template files) to fun Flask. [*Tornado Server*](http://www.tornadoweb.org/en/stable/) is used to help my Flask apps to handle multiple users without crashing it.
+ - `spark`: This is my consumer. It receives the data stream from Kafka, encrypts the stream and inserts the encrypted data into a MySQL database.
+ - `stream`: Reads the data (WiFi logs) from a csv file, formats it and streams to Kafka. Takes a Kafka topic in as an argument.
