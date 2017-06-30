@@ -50,10 +50,10 @@ def make_item(strItem):
 ## Start: Encryption related helper functions ##
 ################################################
 
-def get_datetime(line, DATETIMEFORMAT='%a %b %d %H:%M:%S UTC %Y'):
+def get_datetime(line, datetimeformat='%a %b %d %H:%M:%S UTC %Y'):
     # Returns date + time + time-zone (by default) of a line
     # Returns datetime
-    return datetime.datetime.strptime(line, DATETIMEFORMAT)
+    return datetime.datetime.strptime(line, datetimeformat)
 
 def add_seconds(given_time, second=60):
     # Adds seconds to the given time
@@ -385,7 +385,7 @@ def encrypt_record(record):
     interval_len = 64
 
     # The full path of the map
-    path = '/home/ubuntu/git/sb-project/data/map-data/rangem.txt'
+    path = authdata.MAPPATH
 
     # Total number of days
     numDays = 100

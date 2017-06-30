@@ -21,6 +21,7 @@ else:
 
 print('The kafka topic is: {}').format(myTopic)
 
+# TODO: read all hard coded values from a config file or pass in as arguments with defaults from config
 # The data file's full path
 datacsv = '/home/ubuntu/git/sb-project/data/data-noUC.csv'
 
@@ -36,28 +37,28 @@ hash_partitioner = HashingPartitioner()
 producer = topic.get_producer(partitioner=hash_partitioner, linger_ms=200)
 
 
-def get_datetime(line, DATETIMEFORMAT='%a %b %d %H:%M:%S UTC %Y'):
+def get_datetime(line, datetimeformat='%a %b %d %H:%M:%S UTC %Y'):
     # Returns date + time + time-zone of a line in the trace
     # Returns datetime
-    return datetime.datetime.strptime(line, DATETIMEFORMAT)
+    return datetime.datetime.strptime(line, datetimeformat)
 
-def get_time(line, TIMEFORMAT='%d days %H hrs %M min %S sec'):
+def get_time(line, timeformat='%d days %H hrs %M min %S sec'):
     # Returns time in datetime type
     if 'days' not in line and 'hrs' in line and 'min' in line and 'sec' in line:
-        TIMEFORMAT = '%H hrs %M min %S sec'
+        timeformat = '%H hrs %M min %S sec'
     if 'days' not in line and 'hrs' not in line and 'min' in line and 'sec' in line:
-        TIMEFORMAT = '%M min %S sec'
+        timeformat = '%M min %S sec'
     if 'days' not in line and 'hrs' not in line and 'min' not in line and 'sec' in line:
-        TIMEFORMAT = '%S sec'
-    return datetime.datetime.strptime(line, TIMEFORMAT)
+        timeformat = '%S sec'
+    return datetime.datetime.strptime(line, timeformat)
 
-def date_to_string(dt, TIMEFORMAT='%H:%M:%S'):
+def date_to_string(dt, timeformat='%H:%M:%S'):
     # Converts datetime to string
-    return datetime.datetime.strftime(dt, TIMEFORMAT)
+    return datetime.datetime.strftime(dt, timeformat)
 
-def datetime_to_string(dt, TIMEFORMAT='%Y-%m-%d %H:%M:%S'):
+def datetime_to_string(dt, timeformat='%Y-%m-%d %H:%M:%S'):
     # Converts datetime to string
-    return datetime.datetime.strftime(dt, TIMEFORMAT)
+    return datetime.datetime.strftime(dt, timeformat)
 
 def add_days(date, day=1):
     # Adds day(s) to the given date. By default adds 1 day
