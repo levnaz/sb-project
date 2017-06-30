@@ -5,4 +5,4 @@ MYSQL_DATABASE_HOST = 'xxxxxxxxx'
 
 AESKEY = 'xxxxxxxxx'
 
-MAPPATH = '/home/ubuntu/git/sb-project/data/map-data/rangem.txt'
+MAPPATH = '/XXXXXXXX'
